@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Car Estimator - Car Details</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: url('/images/car-form.jpeg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            padding-top: 60px;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .card {
+            border-radius: 20px;
+            padding: 30px;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0px 20px 45px rgba(0,0,0,0.2);
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        label { font-weight: 600; color: #1e293b; }
+
+        .form-control {
+            height: 50px;
+            border-radius: 12px;
+        }
+
+        .btn-primary {
+            height: 50px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        #loadingOverlay {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.4);
+            display:none;
+            justify-content:center;
+            align-items:center;
+            z-index:2000;
+        }
+
+        @keyframes fadeIn {
+            from {opacity:0; transform:translateY(20px);}
+            to {opacity:1; transform:translateY(0);}
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <div class="card">
+                <h3 class="mb-4 text-center">Enter Your Car Details</h3>
+
+                <form th:action="@{/estimate}" method="post" id="carForm">
+
+                    <div class="mb-3">
+                        <label>Brand</label>
+                        <select id="brand" name="brand" class="form-control"></select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Model</label>
+                        <select id="modelSelect" name="modelName" class="form-control">
+                            <option value="">-- Select model --</option>
+                        </select>
+                        <input id="modelOther" name="modelName"
+                               class="form-control mt-2 d-none" placeholder="Enter model name">
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Year</label>
+                        <input type="number" name="year" value="2020" min="1990" max="2026" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Mileage (km)</label>
+                        <input type="number" name="mileage" value="30000" class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Accident Severity</label>
+                        <select name="accidentSeverity" class="form-control">
+                            <option value="none">None</option>
+                            <option value="light">Light</option>
+                            <option value="medium">Medium</option>
+                            <option value="heavy">Heavy</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary w-100 mt-3">Estimate Price</button>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="loadingOverlay">
+    <div class="spinner-border text-light" style="width: 70px; height: 70px;"></div>
+</div>
+
+<script>
+    async function loadBrands() {
+        const res = await fetch('/api/brands');
+        const brands = await res.json();
+        const brandSelect = document.getElementById("brand");
+        brandSelect.innerHTML = '';
+        brands.forEach(b => brandSelect.appendChild(new Option(b, b)));
+        brandSelect.appendChild(new Option("Other", "Other"));
+        loadModels(brandSelect.value);
+    }
+
+    async function loadModels(brand) {
+        const res = await fetch('/api/models/' + encodeURIComponent(brand));
+        const models = await res.json();
+        const modelSelect = document.getElementById("modelSelect");
+        modelSelect.innerHTML = '';
+        modelSelect.appendChild(new Option("-- Select model --", ""));
+        models.forEach(m => modelSelect.appendChild(new Option(m, m)));
+        modelSelect.appendChild(new Option("Other", "Other"));
+        toggleModelInput();
+    }
+
+    function toggleModelInput() {
+        const modelSelect = document.getElementById("modelSelect");
+        const otherInput = document.getElementById("modelOther");
+        if (modelSelect.value === "Other") {
+            otherInput.classList.remove("d-none");
+            otherInput.name = "modelName";
+            modelSelect.name = "";
+        } else {
+            otherInput.classList.add("d-none");
+            modelSelect.name = "modelName";
+        }
+    }
+
+    document.getElementById("carForm").addEventListener("submit", function() {
+        document.getElementById("loadingOverlay").style.display = "flex";
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadBrands();
+        document.getElementById("brand").addEventListener("change", e => loadModels(e.target.value));
+        document.getElementById("modelSelect").addEventListener("change", toggleModelInput);
+    });
+</script>
+
+</body>
+</html>

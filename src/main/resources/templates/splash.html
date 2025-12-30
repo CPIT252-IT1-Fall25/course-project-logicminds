@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Loading...</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .logo {
+            color: white;
+            font-size: 42px;
+            font-weight: 700;
+            opacity: 0;
+            animation: fadeIn 1.5s forwards ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    <script>
+        setTimeout(() => {
+            window.location.href = "/login";
+        }, 1800);
+    </script>
+</head>
+
+<body>
+<div class="logo">Used Car Estimator</div>
+</body>
+</html>
